@@ -1,5 +1,6 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 import 'package:admin_shop/home.dart';
+import 'package:admin_shop/main.dart';
 import 'package:admin_shop/models/userSignIn.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -23,7 +24,6 @@ class _LoginState extends State<Login> {
       backgroundColor: Colors.black,
       body: SafeArea(
         child: SingleChildScrollView(
-          physics: NeverScrollableScrollPhysics(),
           child: Container(
             height: MediaQuery.of(context).size.height,
             child: Column(
@@ -115,64 +115,12 @@ class _LoginState extends State<Login> {
                     ),
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 10, left: 25, right: 30),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          Checkbox(
-                            visualDensity: VisualDensity(horizontal: -4.0),
-                            onChanged: (bool? value) {
-                              setState(() {
-                                isChecked = value!;
-                              });
-                            },
-                            value: isChecked,
-                            checkColor: Color.fromRGBO(227, 227, 227, 1.0),
-                            side: BorderSide(
-                              color: Color.fromRGBO(227, 227, 227, 1.0),
-                            ),
-                            fillColor: MaterialStateProperty.resolveWith(
-                              (states) {
-                                return Color.fromRGBO(39, 39, 39, 1);
-                              },
-                            ),
-                          ),
-                          Text(
-                            "Remember me",
-                            style: TextStyle(
-                              color: Color.fromRGBO(227, 227, 227, 0.75),
-                              fontSize: 16,
-                            ),
-                            textAlign: TextAlign.start,
-                          ),
-                        ],
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          // Handle forget password tap
-                        },
-                        child: Text(
-                          'Forget Password?',
-                          style: TextStyle(
-                            color: Colors.blue,
-                            fontSize: 16,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
                 Spacer(),
                 SizedBox(
                   width: MediaQuery.of(context).size.width,
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 30,
-                      vertical: 10,
-                    ),
+                    padding: const EdgeInsets.only(
+                        bottom: 50.0, left: 30.0, right: 30.0),
                     child: ElevatedButton(
                       onPressed: () {
                         _signIn(_emailController.text, _passwordController.text,
@@ -199,34 +147,6 @@ class _LoginState extends State<Login> {
                         ),
                       ),
                     ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(
-                      bottom: 25.0, left: 30.0, right: 30.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        "Don't have an account? ",
-                        style: TextStyle(
-                          color: Color.fromRGBO(227, 227, 227, 0.75),
-                          fontSize: 16,
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          // Action when "Sign up" text is tapped
-                        },
-                        child: Text(
-                          "Sign up",
-                          style: TextStyle(
-                            color: Colors.blue,
-                            fontSize: 16,
-                          ),
-                        ),
-                      ),
-                    ],
                   ),
                 ),
               ],
@@ -260,13 +180,14 @@ Future<void> _signIn(
   if (response.statusCode == 200) {
     final Map<String, dynamic> responseData = json.decode(response.body);
     final userSignInResult = UserSignInResult.fromJson(responseData);
-    Navigator.push(
+    await sp.setString("token", userSignInResult.token);
+    await sp.setString("user", userSignInResult.user.toString());
+    print("Token: ${sp.getString('token')}");
+    debugPrint("Token:" + userSignInResult.token);
+    Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (context) => HomeAdmin(
-          user: userSignInResult.user!,
-          token: userSignInResult.token, // Access token from the instance
-        ),
+        builder: (context) => HomeAdmin(),
       ),
     );
   } else if (response.statusCode == 403) {
@@ -290,6 +211,24 @@ Future<void> _signIn(
           );
         });
   } else {
-    debugPrint("Error");
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text(
+              "Failed",
+              style: TextStyle(color: Colors.red),
+            ),
+            content: Text("Password salah!"),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: Text("OK"),
+              )
+            ],
+          );
+        });
   }
 }

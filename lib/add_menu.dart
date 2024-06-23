@@ -30,8 +30,8 @@ class _AddMenuPageState extends State<AddMenuPage> {
   // Placeholder for categories, replace with your actual categories data
   final List<Map<String, dynamic>> _categories = [
     {'id': 1, 'name': 'Food'},
-    {'id': 2, 'name': 'Americano'},
-    {'id': 3, 'name': 'Latte'},
+    {'id': 2, 'name': 'Coffee'},
+    {'id': 3, 'name': 'Snack'},
     {'id': 4, 'name': 'Non Coffee'}
   ];
 
